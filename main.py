@@ -1,37 +1,49 @@
 import libtcodpy as libtcod
+from collections import deque
 from objects.objects import Player
 from objects.map import Map
 
+#should this function always return something? Probably so since a roguelike proceeds only when the player inputs something
 def handle_keys(currentMap, player):
  
     key = libtcod.console_wait_for_keypress(True)
     if key.vk == libtcod.KEY_ESCAPE:
-        return True  #exit game
+        return "exit"  #exit game
 
     save_x = player.x
     save_y = player.y
 
     #movement keys
     if libtcod.console_is_key_pressed(libtcod.KEY_UP) or chr(key.c) == "k":
-        player.move_object(0, -1)
+        return (0, -1)
     elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN) or chr(key.c) == "j":
-        player.move_object(0, 1)
+        return (0, 1)
     elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT) or chr(key.c) == "h":
-        player.move_object(-1, 0)
+        return (-1, 0)
     elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT) or chr(key.c) == "l":
-        player.move_object(1, 0)
+        return (1, 0)
     elif chr(key.c) == "y":
-    	player.move_object(-1, -1)
+    	return (-1, -1)
     elif chr(key.c) == "u":
-    	player.move_object(1, -1)
+    	return (1, -1)
     elif chr(key.c) == "b":
-    	player.move_object(-1, 1)
+    	return (-1, 1)
     elif chr(key.c) == "n":
-    	player.move_object(1, 1)
+    	return (1, 1)
 
-    if currentMap.getTile(player.x, player.y).block:
+    """if currentMap.getTile(player.x, player.y).block:
         player.x = save_x
-        player.y = save_y
+        player.y = save_y"""
+
+
+def move_step():
+    #this works on the assumption that there is always an element in the queue, and it's the player movement
+    player_vector = movement_queue.popleft()
+    player_new_position = (player.x + player_vector[0], player.y + player_vector[1])
+    if currentMap.isFreeAt(player_new_position[0], player_new_position[1]):
+        player.x = player_new_position[0]
+        player.y = player_new_position[1]
+
 
 
 SCREEN_WIDTH = 40
@@ -47,6 +59,8 @@ currentMap = Map(40, 40)
 currentMap.getTile(10,10).block = True
 currentMap.getTile(10,11).block = True
 
+movement_queue = deque()
+
 while not libtcod.console_is_window_closed():
     libtcod.console_set_default_foreground(0, libtcod.white)
     currentMap.draw()
@@ -54,6 +68,12 @@ while not libtcod.console_is_window_closed():
     libtcod.console_flush()
 
     player.clear()
-    exit = handle_keys(currentMap, player)
-    if exit:
+    command = handle_keys(currentMap, player)
+
+    if command is "exit":
         break
+    #the only possible action rn is moving so there is no need to check command
+    else:
+        movement_queue.append(command)
+
+    move_step()

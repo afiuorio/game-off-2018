@@ -13,6 +13,9 @@ class Map():
     
     def getTile(self, x, y):
         return self.mapBuffer[x][y]
+
+    def isFreeAt(self, x, y):
+        return (self.mapBuffer[x][y].block is False)
     
     def draw(self):
         for y in range(self.height):
