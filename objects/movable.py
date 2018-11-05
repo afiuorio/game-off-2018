@@ -4,6 +4,6 @@ class MovableObject:
         self.x = x;
         self.y = y;
     
-    def move_object(self, dx, dy):
-        self.x += dx
-        self.y += dy
+    def move_object(self, movement_vector):
+        self.x += movement_vector[0]
+        self.y += movement_vector[1]

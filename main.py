@@ -31,9 +31,6 @@ def handle_keys(currentMap, player):
     elif chr(key.c) == "n":
     	return (1, 1)
 
-    """if currentMap.getTile(player.x, player.y).block:
-        player.x = save_x
-        player.y = save_y"""
 
 
 def move_step():
@@ -41,8 +38,7 @@ def move_step():
     player_vector = movement_queue.popleft()
     player_new_position = (player.x + player_vector[0], player.y + player_vector[1])
     if currentMap.isFreeAt(player_new_position[0], player_new_position[1]):
-        player.x = player_new_position[0]
-        player.y = player_new_position[1]
+        player.move_object(player_vector)
 
 
 
