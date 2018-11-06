@@ -10,9 +10,6 @@ def handle_keys(currentMap, player):
     if key.vk == libtcod.KEY_ESCAPE:
         return "exit"  #exit game
 
-    save_x = player.x
-    save_y = player.y
-
     #movement keys
     if libtcod.console_is_key_pressed(libtcod.KEY_UP) or chr(key.c) == "k":
         return (0, -1)
@@ -31,13 +28,18 @@ def handle_keys(currentMap, player):
     elif chr(key.c) == "n":
     	return (1, 1)
 
+    #catch all the other keys, do nothing
+    else:
+        return (0, 0)
+
 
 
 def move_step():
     #this works on the assumption that there is always an element in the queue, and it's the player movement
     player_vector = movement_queue.popleft()
+
     player_new_position = (player.x + player_vector[0], player.y + player_vector[1])
-    if currentMap.isFreeAt(player_new_position[0], player_new_position[1]):
+    if currentMap.is_free_at(player_new_position[0], player_new_position[1]):
         player.move_object(player_vector)
 
 
@@ -48,12 +50,22 @@ SCREEN_HEIGHT = 40
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'jurassic-mendel', False)
 
-player = Player('@', 0, 0)
+player = Player('@', 5, 5)
 
 currentMap = Map(40, 40)
 
-currentMap.getTile(10,10).block = True
-currentMap.getTile(10,11).block = True
+currentMap.make_room(1, 1, 11, 11)
+currentMap.make_room(20, 1, 13, 9)
+currentMap.make_room(20, 20, 5, 5)
+currentMap.make_room(3, 33, 4, 2)
+currentMap.make_room(28, 34, 10, 4)
+currentMap.make_corridor(10, 5, 25, 21)
+currentMap.make_corridor(25, 22, 33, 34)
+currentMap.make_corridor(7, 33, 23, 24)
+currentMap.make_walls()
+
+currentMap.get_tile(10, 10).block = True
+currentMap.get_tile(10, 11).block = True
 
 movement_queue = deque()
 
