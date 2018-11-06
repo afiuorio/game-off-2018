@@ -42,7 +42,6 @@ class Map():
                         for k in range(y-1, y+2, 2):
                             if not self.is_free_at(j, k):
                                 self.mapBuffer[j][k] = Tiles("#", True)
-
     
     def draw(self):
         for y in range(self.height):

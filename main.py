@@ -33,7 +33,6 @@ def handle_keys(currentMap, player):
         return (0, 0)
 
 
-
 def move_step():
     #this works on the assumption that there is always an element in the queue, and it's the player movement
     player_vector = movement_queue.popleft()
@@ -66,6 +65,8 @@ currentMap.make_walls()
 
 currentMap.get_tile(10, 10).block = True
 currentMap.get_tile(10, 11).block = True
+
+movement_queue = deque()
 
 movement_queue = deque()
 
