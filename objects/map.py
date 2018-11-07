@@ -8,6 +8,11 @@ class Tiles(DrawableObject):
         DrawableObject.__init__(self, glyph, x, y)
         self.block = block
         self.trasparent = trasparent
+        self.explored = False
+    
+    def draw(self):
+        if self.explored:
+            DrawableObject.draw(self)
 
 
 class Room:
@@ -98,6 +103,9 @@ class Map:
 
     def get_tile(self, x, y):
         return self.mapBuffer[x][y]
+    
+    def get_map_list(self):
+        return [x for sublist in self.mapBuffer for x in sublist]
 
     def is_free_at(self, x, y):
         return (self.mapBuffer[x][y].block is False)
@@ -128,23 +136,29 @@ class Map:
                                 self.mapBuffer[j][k] = Tiles(j, k, "#", True, False)
 
 
-class DrawableMap:
-    def __init__(self, map, player):
-        self.currentMap = map
+class DrawableMap():
+    def __init__(self, currentMap, player):
+        self.currentMap = currentMap
         self.player = player
-        self.fov_map = libtcod.map_new(map.lenght, map.height)
+        self.fov_map = libtcod.map_new(currentMap.lenght, currentMap.height)
 
-        for y in range(self.currentMap.height):
-            for x in range(self.currentMap.lenght):
-                libtcod.map_set_properties(self.fov_map, x, y, self.currentMap.get_tile(x, y).trasparent,
-                                           not self.currentMap.get_tile(x, y).block)
+        list(map(lambda tile:libtcod.map_set_properties(self.fov_map, tile.x, tile.y, tile.trasparent, not tile.block) , currentMap.get_map_list()))
+
+        for tile in self.get_tiles_in_fov(): tile.explored = True
+        
+    def get_tiles_in_fov(self):
+        libtcod.map_compute_fov(self.fov_map, self.player.x, self.player.y, 5, True, 0)
+        return list(filter(lambda tile: libtcod.map_is_in_fov(self.fov_map, tile.x, tile.y), self.currentMap.get_map_list()))
+
 
     def get_map(self):
         return self.currentMap
 
     def draw(self):
-        libtcod.map_compute_fov(self.fov_map, self.player.x, self.player.y, 10, True, 0)
-        for y in range(self.currentMap.height):
-            for x in range(self.currentMap.lenght):
-                if libtcod.map_is_in_fov(self.fov_map, x, y):
-                    self.currentMap.get_tile(x, y).draw()
+        for tile in self.currentMap.get_map_list():
+            tile.draw()
+            libtcod.console_set_char_foreground(0, tile.x, tile.y,  libtcod.Color(255, 0, 0))
+        
+        for tile in self.get_tiles_in_fov():
+            self.currentMap.get_tile(tile.x,tile.y).explored = True
+            libtcod.console_set_char_foreground(0, tile.x, tile.y, libtcod.Color(255, 255, 255))
