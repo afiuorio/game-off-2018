@@ -1,7 +1,8 @@
+# noinspection PyDeprecation
 import libtcodpy as libtcod
 from collections import deque
 from objects.objects import Player
-from objects.map import Map, DrawableMap
+from objects.map import Map, MapBuilder, DrawableMap
 
 #should this function always return something? Probably so since a roguelike proceeds only when the player inputs something
 def handle_keys(currentMap, player):
@@ -52,16 +53,8 @@ libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'jurassic-mendel', False)
 player = Player('@', 5, 5)
 
 currentMap = Map(40, 40)
-
-currentMap.make_room(1, 1, 11, 11)
-currentMap.make_room(20, 1, 13, 9)
-currentMap.make_room(20, 20, 5, 5)
-currentMap.make_room(3, 33, 4, 2)
-currentMap.make_room(28, 34, 10, 4)
-currentMap.make_corridor(10, 5, 25, 21)
-currentMap.make_corridor(25, 22, 33, 34)
-currentMap.make_corridor(7, 33, 23, 24)
-currentMap.make_walls()
+map_builder = MapBuilder(currentMap)
+map_builder.make_map()
 
 
 currentDrawMap = DrawableMap(currentMap, player)
