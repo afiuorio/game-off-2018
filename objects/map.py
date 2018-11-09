@@ -54,13 +54,13 @@ class Corridor:
 
 # Maybe the name isn't the best, but it looks close enough to the real Builder pattern to me
 class MapBuilder:
-    def __init__(self, map):
-        self.map = map
+    def __init__(self):
         self.rooms = list()
         self.corridors = list()
 
     # hardcoded for now, it will be procgen in the future
-    def make_map(self):
+    def make_map(self, map_width, map_length):
+        map = Map(map_width, map_length)
         self.rooms.append(Room(1, 1, 11, 11))
         self.rooms.append(Room(20, 1, 13, 9))
         self.rooms.append(Room(20, 20, 5, 5))
@@ -70,22 +70,23 @@ class MapBuilder:
         self.corridors.append(self.rooms[1].link_to(self.rooms[2]))
         self.corridors.append(self.rooms[1].link_to(self.rooms[3]))
         self.corridors.append(self.rooms[3].link_to(self.rooms[4]))
-        self.carve_map()
+        self.carve_map(map)
+        return map
 
-    def carve_map(self):
+    def carve_map(self, map):
         for room in self.rooms:
             for j in range(room.x, room.x + room.w):
                 for k in range(room.y, room.y + room.h):
-                    self.map.mapBuffer[j][k] = Tiles(j, k, ".")
+                    map.mapBuffer[j][k] = Tiles(j, k, ".")
         for corridor in self.corridors:
             j, k = corridor.x, corridor.y
-            self.map.mapBuffer[j][k] = Tiles(j, k, ".")
+            map.mapBuffer[j][k] = Tiles(j, k, ".")
             for direction in corridor.steps:
                 d1, d2 = direction
                 j += d1
                 k += d2
-                self.map.mapBuffer[j][k] = Tiles(j, k, ".")
-        self.map.make_walls()
+                map.mapBuffer[j][k] = Tiles(j, k, ".")
+        map.make_walls()
 
 
 class Map:
