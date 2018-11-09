@@ -39,7 +39,7 @@ def move_step():
     player_vector = movement_queue.popleft()
 
     player_new_position = (player.x + player_vector[0], player.y + player_vector[1])
-    if currentMap.is_free_at(player_new_position[0], player_new_position[1]):
+    if current_map.is_free_at(player_new_position[0], player_new_position[1]):
         player.move_object(player_vector)
 
 
@@ -53,12 +53,11 @@ libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'jurassic-mendel', False)
 player = Player('@', 5, 5)
 
 
-currentMap = Map(SCREEN_WIDTH, SCREEN_HEIGHT)
-map_builder = MapBuilder(currentMap)
-map_builder.make_map()
+map_builder = MapBuilder()
+current_map = map_builder.make_map(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
-currentDrawMap = DrawableMap(currentMap, player)
+currentDrawMap = DrawableMap(current_map, player)
 
 movement_queue = deque()
 libtcod.console_set_default_foreground(0, libtcod.white)
@@ -70,7 +69,7 @@ while not libtcod.console_is_window_closed():
     player.draw()
     libtcod.console_flush()
 
-    command = handle_keys(currentMap, player)
+    command = handle_keys(current_map, player)
 
     if command is "exit":
         break
