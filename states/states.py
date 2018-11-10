@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 import sys
 
+
 class GameState():
     def __init__(self, nameState):
         self.nameState = nameState
@@ -10,7 +11,8 @@ class GameState():
     
     def handle_video(self, game):
         pass
-    
+
+
 class ActiveState(GameState):
     def __init__(self):
         GameState.__init__(self, "Active")
@@ -28,10 +30,12 @@ class ActiveState(GameState):
             libtcod.KEY_DOWN: ("player_movement", (0, 1)),
             libtcod.KEY_LEFT: ("player_movement", (-1, 0)),
             libtcod.KEY_RIGHT: ("player_movement", (1, 0))
+
         }
 
         (eventName, eventData) = key_map.get(key.vk, ('nop', None))
         game.enqueue_event(eventName, eventData)
+
 
 class PauseState(GameState):
     def __init__(self):

@@ -20,11 +20,15 @@ class Game():
         self.game_state = ActiveState()
 
         # FIXME we start with the room, but it could be anything else
-        self.player = Player('@', 5, 5)
 
-        self.current_map = MapBuilder().make_map(SCREEN_WIDTH, SCREEN_HEIGHT)
+        #self.player = Player('@', 5, 5)
+
+        self.current_map = MapBuilder(1).make_map(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+        starting_position = self.current_map.get_free_space()
+        self.player = Player('@', starting_position[0], starting_position[1])
+
         self.currentDrawMap = DrawableMap(self.current_map, self.player)
-
     def enqueue_event(self, eventName, eventData):
         self.event_queue.append((eventName, eventData))
     
