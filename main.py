@@ -21,7 +21,7 @@ class Game():
 
         # FIXME we start with the room, but it could be anything else
 
-        #self.player = Player('@', 5, 5)
+        # self.player = Player('@', 5, 5)
 
         self.current_map = MapBuilder(1).make_map(SCREEN_WIDTH, SCREEN_HEIGHT)
 
@@ -29,6 +29,9 @@ class Game():
         self.player = Player('@', starting_position[0], starting_position[1])
 
         self.currentDrawMap = DrawableMap(self.current_map, self.player)
+
+
+
     def enqueue_event(self, eventName, eventData):
         self.event_queue.append((eventName, eventData))
     
@@ -49,17 +52,21 @@ class Game():
             # handling events
             while self.event_queue:
                 (eventName, eventData) = self.dequeue_event()
-                # FIXME this is perfect for patter matching
+                # FIXME this is perfect for pattern matching
                 if(eventName == "exit_game"):
                     sys.exit()
                 elif(eventName == "player_movement"):
                     player_new_position = (self.player.x + eventData[0], self.player.y + eventData[1])
-                    if self.current_map.is_free_at(player_new_position[0], player_new_position[1]):
+                    if self.current_map.is_anyone_at(player_new_position[0], player_new_position[1]):
+                        print("Pip!")
+                    elif self.current_map.is_blocked_at(player_new_position[0], player_new_position[1]):
                         self.player.move_object(eventData)
+
                 elif(eventName == "go_pause"):
                     self.game_state = PauseState()
                 elif(eventName == "go_active"):
                     self.game_state = ActiveState()
+
 
 
 

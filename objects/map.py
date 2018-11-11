@@ -1,4 +1,5 @@
 from .objects import DrawableObject
+from .objects import Monster
 import libtcodpy as libtcod
 from random import shuffle, randint
 
@@ -58,6 +59,7 @@ class Room:
         self.dimensions.intersect(room2.dimensions)
 
 
+
 class Corridor:
     def __init__(self, point):
         self.x = point[0]
@@ -111,17 +113,18 @@ class MapBuilder:
         # this is NOT PYTHONIC
         for i in range(len(self.rooms)):
             double_corridor = range(1, 10) is 10
-            next = 0 if (i+1) is len(self.rooms) else i + 1
-            self.corridors.append(self.rooms[i].link_to(self.rooms[next]))
+            next_room = 0 if (i+1) is len(self.rooms) else i + 1
+            self.corridors.append(self.rooms[i].link_to(self.rooms[next_room]))
             if double_corridor:
-                next = randint(0, len(self.rooms) - 1)
-                if next is i:
-                    if next is len(self.rooms) - 1:
-                        next -= 1
+                next_room = randint(0, len(self.rooms) - 1)
+                if next_room is i:
+                    if next_room is len(self.rooms) - 1:
+                        next_room -= 1
                     else:
-                        next += 1
-                self.corridors.append(self.rooms[i].link_to(self.rooms[next]))
+                        next_room += 1
+                self.corridors.append(self.rooms[i].link_to(self.rooms[next_room]))
 
+        self.fill_enemies()
         self.carve_map()
         return self.map
 
@@ -130,6 +133,16 @@ class MapBuilder:
              room_height)
         self.rooms.append(new_room)
 
+    def fill_enemies(self):
+        for room in self.rooms:
+            enemy_number = (self.depth * 2) + randint(-1, 2)
+            for i in range(enemy_number):
+                x = randint(room.dimensions.x1, room.dimensions.x2)
+                y = randint(room.dimensions.y1, room.dimensions.y2)
+                while self.map.is_something_at(x, y):
+                    x = randint(room.dimensions.x1, room.dimensions.x2)
+                    y = randint(room.dimensions.y1, room.dimensions.y2)
+                self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "Just a friendly small thing"))
 
     def carve_map(self):
         for room in self.rooms:
@@ -165,7 +178,7 @@ class Map:
         self.width = map_x
         self.height = map_y
         self.quadrants = Quadrants(Rectangle(0, 0, map_x, map_y))
-
+        self.entity_list = list()
         self.mapBuffer = [[Tiles(x, y, " ", True) for y in range(map_y)] for x in range(map_x)]
 
     def get_tile(self, x, y):
@@ -174,9 +187,17 @@ class Map:
     def get_map_list(self):
         return [x for sublist in self.mapBuffer for x in sublist]
 
-    def is_free_at(self, x, y):
+    def is_blocked_at(self, x, y):
         return (self.mapBuffer[x][y].block is False)
 
+    def is_anyone_at(self, x, y):
+        for entity in self.entity_list:
+            if entity.x is x and entity.y is y:
+                return True
+        return False
+
+    def is_something_at(self, x, y):
+        return self.is_blocked_at(x, y) and self.is_anyone_at(x, y)
 
     # we should check if the values are inside the map
     def make_room(self, x, y, w, h):
@@ -197,18 +218,18 @@ class Map:
     def make_walls(self):
         for x in range(self.width):
             for y in range(self.height):
-                if self.is_free_at(x, y):
+                if self.is_blocked_at(x, y):
                     for j in range(x - 1, x + 2):
                         for k in range(y - 1, y + 2):
-                            if not self.is_free_at(j, k):
+                            if not self.is_blocked_at(j, k):
                                 self.mapBuffer[j][k] = Tiles(j, k, "#", True, False)
 
     def get_free_space(self):
-        x = randint(1, self.width / 2)
-        y = randint(1, self.height / 2)
-        while not self.is_free_at(x, y):
-            x += 1
-            y += 1
+        x = randint(1, self.width - 1)
+        y = randint(1, self.height - 1)
+        while not self.is_blocked_at(x, y) and not self.is_anyone_at(x, y):
+            x = randint(1, self.width - 1)
+            y = randint(1, self.height - 1)
         return (x, y)
 
 

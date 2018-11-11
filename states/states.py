@@ -20,6 +20,8 @@ class ActiveState(GameState):
     def handle_video(self, game):
         game.currentDrawMap.draw()
         game.player.draw()
+        for enemy in game.current_map.entity_list:
+            enemy.draw()
 
     def handle_input(self, game, key):
         key_map = {
@@ -29,12 +31,16 @@ class ActiveState(GameState):
             libtcod.KEY_UP: ("player_movement", (0, -1)),
             libtcod.KEY_DOWN: ("player_movement", (0, 1)),
             libtcod.KEY_LEFT: ("player_movement", (-1, 0)),
-            libtcod.KEY_RIGHT: ("player_movement", (1, 0))
+            libtcod.KEY_RIGHT: ("player_movement", (1, 0)),
 
         }
 
         (eventName, eventData) = key_map.get(key.vk, ('nop', None))
         game.enqueue_event(eventName, eventData)
+
+    def handle_world(self, game):
+        for enemy in game.enemy_list:
+            game.enqueue_event(enemy.act())
 
 
 class PauseState(GameState):
