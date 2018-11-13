@@ -1,13 +1,15 @@
 from random import choice, randint
 
-class AIObject:
 
-    # the idea would be to pass the algorithm to the __init__ but I don't know how to do that!
+class AIObject:
+    def __init__(self, algorithm):
+        self.algorithm = algorithm
+
     def act(self):
-        return self.random()
+        return self.algorithm()
 
     @staticmethod
-    def random():
+    def pipsqueak_ai():
         action = randint(0,100)
         if action is 50:
             return ("monster_action", "pip")
