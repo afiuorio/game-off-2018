@@ -40,8 +40,9 @@ class ActiveState(GameState):
         game.enqueue_event(eventName, eventData)
 
     def handle_world(self, game):
-        for enemy in game.enemy_list:
-            game.enqueue_event(enemy.act())
+        for enemy in game.current_map.entity_list:
+            action = enemy.act()
+            game.enqueue_event(action[0], (action[1], enemy))
 
 
 class PauseState(GameState):

@@ -193,8 +193,8 @@ class Map:
     def is_anyone_at(self, x, y):
         for entity in self.entity_list:
             if entity.x is x and entity.y is y:
-                return True
-        return False
+                return entity
+        return None
 
     def is_something_at(self, x, y):
         return self.is_blocked_at(x, y) and self.is_anyone_at(x, y)

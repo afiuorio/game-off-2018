@@ -48,6 +48,7 @@ class Game():
 
             key = libtcod.console_wait_for_keypress(True)
             self.game_state.handle_input(self, key)
+            self.game_state.handle_world(self)
             # handling events
             while self.event_queue:
                 (eventName, eventData) = self.dequeue_event()
@@ -56,11 +57,22 @@ class Game():
                     sys.exit()
                 elif(eventName == "player_movement"):
                     player_new_position = (self.player.x + eventData[0], self.player.y + eventData[1])
-                    if self.current_map.is_anyone_at(player_new_position[0], player_new_position[1]):
-                        print("Pip!")
+                    enemy = self.current_map.is_anyone_at(player_new_position[0], player_new_position[1])
+                    if enemy:
+                        print(enemy.get_infos())
                     elif self.current_map.is_blocked_at(player_new_position[0], player_new_position[1]):
                         self.player.move_object(eventData)
-
+                elif(eventName == "monster_movement"):
+                    vector = eventData[0]
+                    enemy = eventData[1]
+                    enemy_new_position = (enemy.x + vector[0], enemy.y + vector[1])
+                    if self.current_map.is_anyone_at(enemy_new_position[0], enemy_new_position[1]):
+                        pass
+                    elif self.current_map.is_blocked_at(enemy_new_position[0], enemy_new_position[1]):
+                        enemy.move_object(vector)
+                elif(eventName == "monster_action"):
+                    if(eventData[0] == "pip"):
+                        print(str(eventData[1]) + " says: Pip!")
                 elif(eventName == "go_pause"):
                     self.game_state = PauseState()
                 elif(eventName == "go_active"):
