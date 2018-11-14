@@ -1,8 +1,7 @@
-import libtcodpy as libtcod
 from collections import deque
 from objects.objects import Player
 
-from gui import GameScreen
+from interface.gui import GameScreen, Message
 
 from objects.map import *
 from states.states import *
@@ -56,7 +55,7 @@ class Game():
                     player_new_position = (self.player.x + eventData[0][0], self.player.y + eventData[0][1])
                     enemy = self.current_map.is_anyone_at(player_new_position[0], player_new_position[1])
                     if enemy:
-                        print(enemy.get_infos())
+                        self.game_screen.message_log.add_line(Message(enemy.get_infos()))
                     elif self.current_map.is_blocked_at(player_new_position[0], player_new_position[1]):
                         self.player.move_object(eventData[0])
                 elif(eventName == "monster_movement"):
@@ -69,8 +68,8 @@ class Game():
                         enemy.move_object(vector)
                 elif(eventName == "monster_action"):
                     if(eventData[0] == "pip"):
-                        print(str(eventData[1]) + " says: Pip!")
-                #FIXME these should be a static factories        
+                        self.game_screen.message_log.add_line(Message(str(eventData[1]) + " says: Pip!", libtcod.light_green))
+                # FIXME these should be a static factories
                 elif(eventName == "go_pause"):
                     self.game_state = self.game_states_map.get("Pause")
                 elif(eventName == "go_active"):
