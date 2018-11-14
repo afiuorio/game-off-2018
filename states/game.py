@@ -2,27 +2,19 @@ import libtcodpy as libtcod
 from collections import deque
 from objects.objects import Player
 
+from gui import GameScreen
+
 from objects.map import *
 from states.states import *
 
 class Game():
     def __init__(self, is_debug):
-        # FIXME this first part should be read from a config file
-        SCREEN_WIDTH = 40
-        SCREEN_HEIGHT = 40
+        self.game_screen = GameScreen(40, 50, 40)
         self.debug = is_debug
-
-        libtcod.console_set_custom_font('resources/arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-        libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'jurassic-mendel', False)
-        libtcod.console_set_default_foreground(0, libtcod.white)
 
         self.event_queue = deque()
 
-        # FIXME we start with the room, but it could be anything else
-
-        # self.player = Player('@', 5, 5)
-
-        self.current_map = MapBuilder(1).make_map(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.current_map = MapBuilder(1).make_map(self.game_screen.game_width, self.game_screen.game_height)
 
         starting_position = self.current_map.get_free_space()
         self.player = Player('@', starting_position[0], starting_position[1])
@@ -40,8 +32,6 @@ class Game():
 
         self.game_state = self.game_states_map.get("Active")
 
-
-
     def enqueue_event(self, eventName, eventData):
         self.event_queue.append((eventName, eventData))
     
@@ -53,9 +43,7 @@ class Game():
     
     def run_game(self):
         while not libtcod.console_is_window_closed():
-            libtcod.console_clear(0)
-            self.game_state.handle_video(self)
-            libtcod.console_flush()
+            self.game_screen.render_all(self)
 
             self.game_state.handle_world(self)
             # handling events
