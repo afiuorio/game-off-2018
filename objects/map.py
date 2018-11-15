@@ -143,7 +143,8 @@ class MapBuilder:
                 while self.map.is_something_at(x, y):
                     x = randint(room.dimensions.x1, room.dimensions.x2)
                     y = randint(room.dimensions.y1, room.dimensions.y2)
-                self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing", AIObject.pipsqueak_ai))
+                self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing",
+                                                    AIObject.pipsqueak_ai))
 
     def carve_map(self):
         for room in self.rooms:

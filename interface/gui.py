@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 from textwrap import wrap
 
+
 class GameScreen:
     def __init__(self, width, height, game_height):
         # FIXME this first part should be read from a config file

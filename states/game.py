@@ -5,8 +5,6 @@ from interface.gui import GameScreen
 from objects.map import *
 from states.states import *
 
-import sys
-
 
 class Game():
     def __init__(self, is_debug):
@@ -40,30 +38,5 @@ class Game():
 
             world_handler = self.game_state.handle_world(self)
             for event in world_handler:
-                eventName, eventData = event.event
-                # FIXME maybe a dictonary of functions ?
-                if(eventName == "exit_game"):
-                    sys.exit()
-                elif(eventName == "player_movement"):
-                    player_new_position = (self.player.x + eventData[0][0], self.player.y + eventData[0][1])
-                    enemy = self.current_map.is_anyone_at(player_new_position[0], player_new_position[1])
-                    if enemy:
-                        self.game_screen.message_log.add_line(Message(enemy.get_infos()))
-                    elif self.current_map.is_blocked_at(player_new_position[0], player_new_position[1]):
-                        self.player.move_object(eventData[0])
-                elif(eventName == "monster_movement"):
-                    vector = eventData[0]
-                    enemy = eventData[1]
-                    enemy_new_position = (enemy.x + vector[0], enemy.y + vector[1])
-                    if self.current_map.is_anyone_at(enemy_new_position[0], enemy_new_position[1]):
-                        pass
-                    elif self.current_map.is_blocked_at(enemy_new_position[0], enemy_new_position[1]):
-                        enemy.move_object(vector)
-                elif(eventName == "monster_action"):
-                    if(eventData[0] == "pip"):
-                        self.game_screen.message_log.add_line(Message(str(eventData[1]) + " says: Pip!", libtcod.light_green))
-                # FIXME these should be a static factories
-                elif(eventName == "go_pause"):
-                    self.game_state = self.game_states_map.get("Pause")
-                elif(eventName == "go_active"):
-                    self.game_state = self.game_states_map.get("Active")
+                event.handle(self, event.info, event.origin)
+
