@@ -1,17 +1,17 @@
-from collections import deque
 from objects.objects import Player
 
-from interface.gui import GameScreen, Message
+from interface.gui import GameScreen
 
 from objects.map import *
 from states.states import *
+
+import sys
+
 
 class Game():
     def __init__(self, is_debug):
         self.game_screen = GameScreen(40, 50, 40)
         self.debug = is_debug
-
-        self.event_queue = deque()
 
         self.current_map = MapBuilder(1).make_map(self.game_screen.game_width, self.game_screen.game_height)
 
@@ -30,12 +30,6 @@ class Game():
         }
 
         self.game_state = self.game_states_map.get("Active")
-
-    def enqueue_event(self, eventName, eventData):
-        self.event_queue.append((eventName, eventData))
-    
-    def dequeue_event(self):
-        return self.event_queue.pop()
     
     def change_game_state(self, newState):
         self.game_state = newState
@@ -44,10 +38,9 @@ class Game():
         while not libtcod.console_is_window_closed():
             self.game_screen.render_all(self)
 
-            self.game_state.handle_world(self)
-            # handling events
-            while self.event_queue:
-                (eventName, eventData) = self.dequeue_event()
+            world_handler = self.game_state.handle_world(self)
+            for event in world_handler:
+                eventName, eventData = event.event
                 # FIXME maybe a dictonary of functions ?
                 if(eventName == "exit_game"):
                     sys.exit()

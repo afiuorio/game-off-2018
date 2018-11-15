@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
-import sys
+from interface.gui import Message
+from states.event import Event
 
 
 class GameState():
@@ -28,7 +29,8 @@ class ActiveState(GameState):
         for enemy in game.current_map.entity_list:
             action = enemy.act(game)
             #FIXME Maybe a tuple with 3 elements instead?
-            game.enqueue_event(action[0], (action[1], enemy))
+            event = Event((action[0], (action[1], enemy)))
+            yield event
 
 
 class PauseState(GameState):
@@ -41,7 +43,29 @@ class PauseState(GameState):
     def handle_world(self, game):
         key = libtcod.console_wait_for_keypress(True)
         if key.vk == libtcod.KEY_ESCAPE:
-            game.enqueue_event("exit_game", None)
-        if key.vk == libtcod.KEY_ENTER:
-            game.enqueue_event("go_active", None)
+            event = Event(("exit_game", None))
+        elif key.vk == libtcod.KEY_ENTER:
+            event = Event(("go_active", None))
 
+        yield event
+
+
+class GameOver(GameState):
+    def __init__(self):
+        GameState.__init__(self, "Game Over")
+
+    def handle_video(self, game):
+        game.game_screen.message_log.clear()
+        game.game_screen.message_log.add_line(Message("You died, how sad!", libtcod.red))
+        # FIXME: why I can't print this message on the game_area console? Only the root seems to work
+        libtcod.console_print_ex(0,
+                                 int(game.game_screen.game_width / 2), int(game.game_screen.game_height / 2),
+                                 libtcod.BKGND_NONE, libtcod.CENTER, "GAME OVER")
+        libtcod.console_print_ex
+
+    def handle_world(self, game):
+        key = libtcod.console_wait_for_keypress(True)
+        if key.vk == libtcod.KEY_ESCAPE:
+            event = Event(("exit_game", None))
+
+        yield event
