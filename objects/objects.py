@@ -2,14 +2,16 @@ from .drawable import DrawableObject
 from .movable import MovableObject
 from .descriptionobject import DescriptionObject
 from .aiable import AIObject
+from .combatable import CombatObject
 
 
-class Entity(DrawableObject, MovableObject, DescriptionObject, AIObject):
-    def __init__(self, sprite, x, y, name, description, ai):
+class Entity(DrawableObject, MovableObject, DescriptionObject, AIObject, CombatObject):
+    def __init__(self, sprite, x, y, name, description, ai, hp, attack, defense):
         MovableObject.__init__(self, x, y)
         DrawableObject.__init__(self, sprite, x, y)
         DescriptionObject.__init__(self, name, description)
         AIObject.__init__(self, ai)
+        CombatObject.__init__(self, hp, attack, defense)
     
     def __str__(self):
         return self.name
@@ -17,10 +19,16 @@ class Entity(DrawableObject, MovableObject, DescriptionObject, AIObject):
 
 class Player(Entity):
     def __init__(self, sprite, x, y):
-        Entity.__init__(self, sprite, x, y, "Player", "A player", AIObject.get_input_act)
+        Entity.__init__(self, sprite, x, y, "Player", "A player", AIObject.get_input_act, 10, 4, 3)
+
+    def dies(self):
+        self.algorithm = AIObject.player_death
 
 
 class Monster(Entity):
-    def __init__(self, sprite, x, y, name, description, ai):
-        Entity.__init__(self, sprite, x, y, name, description, ai)
+    def __init__(self, sprite, x, y, name, description, ai, hp, attack, defense):
+        Entity.__init__(self, sprite, x, y, name, description, ai, hp, attack, defense)
+
+    def dies(self):
+        self.algorithm = AIObject.death
 
