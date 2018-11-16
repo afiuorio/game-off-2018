@@ -38,5 +38,5 @@ class Game():
 
             world_handler = self.game_state.handle_world(self)
             for event in world_handler:
-                event.handle(self, event.info, event.origin)
+                event.handle(event, self)
 
