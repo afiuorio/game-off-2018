@@ -59,3 +59,6 @@ class MessageLog:
                 del self.on_screen_message_list[0]
 
             self.on_screen_message_list.append(Message(line, message.color))
+
+    def clear_list(self):
+        self.on_screen_message_list = list()

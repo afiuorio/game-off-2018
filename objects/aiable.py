@@ -37,4 +37,16 @@ class AIObject:
 
         }
 
-        return key_map.get(key.vk, ('nop', None))
+        return key_map.get(key.vk, ("nop", None))
+
+    @staticmethod
+    def player_death(game):
+        return ("game_over", None)
+
+    @staticmethod
+    def death(game):
+        return ("death", None)
+
+    @staticmethod
+    def passive(game):
+        return ("nop", None)

@@ -165,7 +165,7 @@ class MapBuilder:
                     x = randint(room.dimensions.x1, room.dimensions.x2)
                     y = randint(room.dimensions.y1, room.dimensions.y2)
                 self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing",
-                                                    AIObject.pipsqueak_ai))
+                                                    AIObject.pipsqueak_ai, 5, 999, 1))
 
     def carve_map(self):
         for room in self.rooms:
@@ -285,6 +285,7 @@ class DrawableMap():
         for tile in self.get_tiles_in_fov():
             self.currentMap.get_tile(tile.x,tile.y).explored = True
             libtcod.console_set_char_foreground(0, tile.x, tile.y, libtcod.Color(255, 255, 255))
+
 
 class DebugDrawableMap():
     def __init__(self, currentMap, player):
