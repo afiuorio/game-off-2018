@@ -26,7 +26,7 @@ class ActiveState(GameState):
 
     def handle_world(self, game):
         for enemy in game.current_map.entity_list:
-            action = enemy.act(game)
+            action = enemy.act(enemy, game)
             event = Event(action[0], action[1], enemy)
             yield event
 

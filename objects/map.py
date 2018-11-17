@@ -1,8 +1,12 @@
 from .objects import DrawableObject
 from .objects import Monster
 from .objects import AIObject
+
+from random import shuffle, randint, choice
+from copy import deepcopy
+
 import libtcodpy as libtcod
-from random import shuffle, randint
+
 
 
 class Tiles(DrawableObject):
@@ -143,8 +147,12 @@ class MapBuilder:
                 while self.map.is_something_at(x, y):
                     x = randint(room.dimensions.x1, room.dimensions.x2)
                     y = randint(room.dimensions.y1, room.dimensions.y2)
-                self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing",
-                                                    AIObject.pipsqueak_ai, 5, 999, 1))
+                if randint(0, 10) < 10:
+                    self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing", "Pip!",
+                                                     5, 4, 1))
+                else:
+                    self.map.entity_list.append(Monster("O", x, y, "Odd Ooze", "Oddly obstinated ochre ooze", "Fgfsd",
+                                                        10, 6, 1))
 
     def carve_map(self):
         for room in self.rooms:
@@ -234,6 +242,67 @@ class Map:
             y = randint(1, self.height - 1)
         return (x, y)
 
+    # tries to return a random cardinal direction towards the target
+    # if the target is reached returns None
+    # if the next step towards the target is blocked returns (0, 0), meaning to wait
+    def get_step_towards(self, origin_x, origin_y, target_x, target_y):
+        if self.get_distance(origin_x, origin_y, target_x, target_y) is 1:
+            if target_x < origin_x:
+                return (-1, 0)
+            elif target_x > origin_x:
+                return (1, 0)
+            elif target_y < origin_y:
+                return (0, -1)
+            elif target_y > origin_y:
+                return (0, 1)
+        else:
+            dx = 1 if origin_x < target_x else -1 if origin_x > target_x else 0
+            dy = 1 if origin_y < target_y else -1 if origin_y > target_y else 0
+            vectors = ((dx, 0), (0, dy))
+            index = randint(0,1)
+            tentative_direction = vectors[index]
+            if self.is_anyone_at(origin_x + tentative_direction[0], origin_y + tentative_direction[1]):
+                index = 1 - index
+                if self.is_anyone_at(origin_x + tentative_direction[0], origin_y + tentative_direction[1]):
+                    return (0, 0)
+                else:
+                    return tentative_direction
+            else:
+                return tentative_direction
+
+    def path_towards_astar(self, game, origin, target):
+        fov = libtcod.map_new(self.width, self.height)
+
+        list(map(lambda tile: libtcod.map_set_properties(fov, tile.x, tile.y, tile.trasparent, not tile.block),
+                 self.get_map_list()))
+
+        for entity in self.entity_list:
+            if entity != origin and entity != target:
+                libtcod.map_set_properties(fov, entity.x, entity.y, True, False)
+
+        my_path = libtcod.path_new_using_map(fov, 0.0)
+
+        libtcod.path_compute(my_path, origin.x, origin.y, target.x, target.y)
+
+        return_direction = (0, 0)
+        if not libtcod.path_is_empty(my_path):# and libtcod.path_size(my_path) < 20:
+            x, y = libtcod.path_walk(my_path, True)
+            if x or y:
+                x1 = 1 if origin.x < x else -1 if origin.x > x else 0
+                y1 = 1 if origin.y < y else -1 if origin.y > y else 0
+                return_direction = (x1, y1)
+        else:
+            return_direction = self.get_step_towards(origin.x, origin.y, target.x, target.y)
+
+        libtcod.path_delete(my_path)
+        return return_direction
+
+    # taxicab norm
+    def get_distance(self, origin_x, origin_y, target_x, target_y):
+        width = abs(origin_x - target_x)
+        height = abs(origin_y - target_y)
+        return width + height
+
 
 class DrawableMap():
     def __init__(self, currentMap, player):
@@ -242,7 +311,8 @@ class DrawableMap():
         self.fov_map = libtcod.map_new(currentMap.width, currentMap.height)
         self.fov_size = 5
 
-        list(map(lambda tile:libtcod.map_set_properties(self.fov_map, tile.x, tile.y, tile.trasparent, not tile.block) , currentMap.get_map_list()))
+        list(map(lambda tile:libtcod.map_set_properties(self.fov_map, tile.x, tile.y, tile.trasparent, not tile.block),
+                 currentMap.get_map_list()))
 
         for tile in self.get_tiles_in_fov(): tile.explored = True
         
