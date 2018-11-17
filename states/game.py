@@ -32,6 +32,7 @@ class Game():
             self.current_map = MapBuilder(1).make_map(self.game_screen.game_width, self.game_screen.game_height)
             starting_position = self.current_map.get_free_space()
         self.player = Player('@', starting_position[0], starting_position[1])
+        # player MUST BE the first entity in the list
         self.current_map.entity_list.insert(0, self.player)
 
         if(is_debug):
