@@ -93,8 +93,8 @@ class MapBuilder:
         self.corridors = list()
         self.depth = depth
 
-    def make_map(self, map_width, map_length):
-        self.map = Map(map_width, map_length)
+    def make_map(self, map_width, map_height):
+        self.map = Map(map_width, map_height)
         max_rooms_per_quadrant = (self.depth * 2) + randint(-1, 1)
         big_room = range(1, 20) is 20
 
@@ -128,6 +128,27 @@ class MapBuilder:
         self.fill_enemies()
         self.carve_map()
         return self.map
+
+    def make_map_debug(self, map_width, map_height):
+        self.map = Map(map_width, map_height)
+        room = Room(int(map_width / 4), int(map_height / 4), int(map_width / 2), int(map_height / 2))
+        self.rooms.append(room)
+        self.map.entity_list.append(
+            Monster("p", int(map_width / 4) * 3 - 2, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
+                                            AIObject.pipsqueak_ai))
+        self.map.entity_list.append(
+            Monster("p", int(map_width / 4) * 3 - 4, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
+                    AIObject.pipsqueak_ai))
+        self.map.entity_list.append(
+            Monster("p", int(map_width / 4) * 3 - 6, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
+                    AIObject.pipsqueak_ai))
+        self.carve_map()
+        for x in range(int(map_width / 8) * 3, int(map_width / 8) * 5):
+            for y in range(int(map_height / 8) * 3, int(map_height / 8) * 5):
+                self.map.mapBuffer[x][y] = Tiles(x, y, "#", True, False)
+        return self.map
+
+
 
     def make_room(self, quadrant, room_width, room_height):
         new_room = Room(randint(quadrant.x1 + 1, quadrant.x2 - room_width - 2), randint(quadrant.y1 + 1, quadrant.y2 - room_height - 2), room_width,

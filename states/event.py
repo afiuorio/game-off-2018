@@ -38,7 +38,7 @@ class Event:
             enemy.move_object(vector)
 
     def monster_action_handler(self, game):
-        if self.info is "pip":
+        if self.info == "pip":
             game.game_screen.message_log.add_line(Message(str(self.origin) + " says: Pip!", libtcod.light_green))
 
     def go_pause_handler(self, game):
@@ -47,6 +47,12 @@ class Event:
     def go_active_handler(self, game):
         game.game_state = game.game_states_map.get("Active")
 
+    def reset_handler(self, game):
+        if game.debug:
+            game.reset()
+        else:
+            pass
+
     def nop_handler(self, game):
         pass
 
@@ -54,5 +60,5 @@ class Event:
 event_to_handler = {"exit_game" : Event.exit_game_handler, "player_movement": Event.player_movement_handler,
                     "monster_movement": Event.monster_movement_handler, "monster_action": Event.monster_action_handler,
                     "go_pause": Event.go_pause_handler, "go_active": Event.go_active_handler,
-                    "nop": Event.nop_handler,
+                    "nop": Event.nop_handler, "reset": Event.reset_handler,
                     }

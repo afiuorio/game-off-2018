@@ -27,10 +27,13 @@ class AIObject:
             libtcod.KEY_ESCAPE: ("exit_game", None),
             libtcod.KEY_ENTER: ("go_pause", None),
 
+            libtcod.KEY_SPACE: ("reset", None),
+
             libtcod.KEY_UP: ("player_movement", (0, -1)),
             libtcod.KEY_DOWN: ("player_movement", (0, 1)),
             libtcod.KEY_LEFT: ("player_movement", (-1, 0)),
             libtcod.KEY_RIGHT: ("player_movement", (1, 0)),
+
 
         }
 
