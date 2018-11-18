@@ -46,7 +46,8 @@ class Event:
             self.origin.move_object(self.info)
 
     def monster_action_handler(self, game):
-        game.game_screen.message_log.add_line(Message(str(self.origin) + " says: " + self.info + "!", libtcod.light_green))
+        game.game_screen.message_log.add_line(
+            Message(str(self.origin) + " says: " + self.info + "!", libtcod.light_green))
 
     def go_pause_handler(self, game):
         game.game_state = game.game_states_map.get("Pause")
@@ -54,15 +55,15 @@ class Event:
     def go_active_handler(self, game):
         game.game_state = game.game_states_map.get("Active")
 
+    def go_game_over_handler(self, game):
+        libtcod.console_wait_for_keypress(True)
+        game.game_state = game.game_states_map.get("Game Over")
+
     def reset_handler(self, game):
         if game.debug:
             game.reset()
         else:
             pass
-
-    def go_game_over_handler(self, game):
-        libtcod.console_wait_for_keypress(True)
-        game.game_state = game.game_states_map.get("Game Over")
 
     def nop_handler(self, game):
         pass
@@ -90,11 +91,10 @@ class Event:
         return game.current_map.is_anyone_at(entity_new_position[0], entity_new_position[1]), entity_new_position
 
 
-event_to_handler = {"exit_game" : Event.exit_game_handler, "player_movement": Event.player_movement_handler,
+event_to_handler = {"exit_game": Event.exit_game_handler, "player_movement": Event.player_movement_handler,
                     "monster_movement": Event.monster_movement_handler, "monster_action": Event.monster_action_handler,
                     "monster_aggressive_movement": Event.monster_aggressive_movement_handler,
                     "go_pause": Event.go_pause_handler, "go_active": Event.go_active_handler,
-                    "nop": Event.nop_handler, "reset": Event.reset_handler,
                     "game_over": Event.go_game_over_handler, "nop": Event.nop_handler,
-                    "death": Event.death_handler,
+                    "death": Event.death_handler, "reset": Event.reset_handler,
                     }

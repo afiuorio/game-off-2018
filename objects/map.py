@@ -8,7 +8,6 @@ from copy import deepcopy
 import libtcodpy as libtcod
 
 
-
 class Tiles(DrawableObject):
     def __init__(self, x, y, glyph="", block=False, trasparent=True):
         DrawableObject.__init__(self, glyph, x, y)
@@ -62,7 +61,6 @@ class Room:
 
     def intersect(self, room2):
         self.dimensions.intersect(room2.dimensions)
-
 
 
 class Corridor:
@@ -138,21 +136,22 @@ class MapBuilder:
         room = Room(int(map_width / 4), int(map_height / 4), int(map_width / 2), int(map_height / 2))
         self.rooms.append(room)
         self.map.entity_list.append(
-            Monster("p", int(map_width / 4) * 3 - 2, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
-                                            AIObject.pipsqueak_ai))
+            Monster("p", int(map_width / 4) +3, int(map_height / 4) + 2, "Pipsqueak", "A friendly small thing",
+                    "Pip!", 5, 4, 1))
         self.map.entity_list.append(
             Monster("p", int(map_width / 4) * 3 - 4, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
-                    AIObject.pipsqueak_ai))
+                    "Pip!", 5, 4, 1))
         self.map.entity_list.append(
             Monster("p", int(map_width / 4) * 3 - 6, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
-                    AIObject.pipsqueak_ai))
+                    "Pip!", 5, 4, 1))
+        self.map.entity_list.append(
+            Monster("O", int(map_width / 4) * 3 - 8, int(map_height / 4) * 3 - 2, "Odd Ooze", "Oddly obstinated ochre ooze",
+                    "Fgfsd", 10, 6, 1))
         self.carve_map()
         for x in range(int(map_width / 8) * 3, int(map_width / 8) * 5):
             for y in range(int(map_height / 8) * 3, int(map_height / 8) * 5):
                 self.map.mapBuffer[x][y] = Tiles(x, y, "#", True, False)
         return self.map
-
-
 
     def make_room(self, quadrant, room_width, room_height):
         new_room = Room(randint(quadrant.x1 + 1, quadrant.x2 - room_width - 2), randint(quadrant.y1 + 1, quadrant.y2 - room_height - 2), room_width,
