@@ -2,6 +2,7 @@ import libtcodpy as libtcod
 from states.event import Event
 from interface.gui import Message
 
+
 class GameState():
     def __init__(self, nameState):
         self.nameState = nameState

@@ -65,8 +65,7 @@ class AIObject:
 
     @staticmethod
     def get_aggro_if_attacked(entity, game):
-        if entity.damaged_last_turn:
-            print(entity.name + " got pissed!!!")
+        if entity.damaged:
             entity.check = AIObject.check_nothing
             entity.algorithm = AIObject.follow_and_attack
 
@@ -74,7 +73,6 @@ class AIObject:
     def get_aggro_on_sight(entity, game):
         # field of view is symmetrical between player and monsters
         if game.currentDrawMap.is_in_fov(entity.x, entity.y):
-            print(entity.name + " got pissed!!!")
             game.game_screen.message_log.add_line(
                 Message(str(entity.name) + " is pissed!", libtcod.red))
             entity.nemesis = game.player
