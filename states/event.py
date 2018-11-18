@@ -21,39 +21,29 @@ class Event:
         sys.exit()
 
     def player_movement_handler(self, game):
-        player_new_position = (self.origin.x + self.info[0], self.origin.y + self.info[1])
-        enemy = game.current_map.is_anyone_at(player_new_position[0], player_new_position[1])
-        if enemy:
-            """self.origin.attack_target(enemy)
-            damage = self.origin.attack - enemy.defense
-            game.game_screen.message_log.add_line(Message("You attack " + enemy.name + " for " + str(damage) + " damage!"))"""
+        entity, player_new_position = self.test_movement(game)
+        if entity:
             self.attack(game)
         elif game.current_map.is_blocked_at(player_new_position[0], player_new_position[1]):
             self.origin.move_object(self.info)
 
     def monster_movement_handler(self, game):
-        vector = self.info
-        monster = self.origin
-        enemy_new_position = (monster.x + vector[0], monster.y + vector[1])
-        entity = game.current_map.is_anyone_at(enemy_new_position[0], enemy_new_position[1])
+        entity, enemy_new_position = self.test_movement(game)
         if entity is game.player:
             game.game_screen.message_log.add_line(Message(self.origin.name + " meekly boops you."))
         elif entity:
             pass
         elif game.current_map.is_blocked_at(enemy_new_position[0], enemy_new_position[1]):
-            monster.move_object(vector)
+            self.origin.move_object(self.info)
 
     def monster_aggressive_movement_handler(self, game):
-        vector = self.info
-        monster = self.origin
-        enemy_new_position = (monster.x + vector[0], monster.y + vector[1])
-        entity = game.current_map.is_anyone_at(enemy_new_position[0], enemy_new_position[1])
+        entity, enemy_new_position = self.test_movement(game)
         if entity is game.player:
             self.attack(game)
         elif entity:
             pass
         elif game.current_map.is_blocked_at(enemy_new_position[0], enemy_new_position[1]):
-            monster.move_object(vector)
+            self.origin.move_object(self.info)
 
     def monster_action_handler(self, game):
         game.game_screen.message_log.add_line(Message(str(self.origin) + " says: " + self.info + "!", libtcod.light_green))
@@ -89,6 +79,9 @@ class Event:
             game.game_screen.message_log.add_line(
                 Message(subject.capitalize() + " swing at the void. That was weird."))
 
+    def test_movement(self, game):
+        entity_new_position = (self.origin.x + self.info[0], self.origin.y + self.info[1])
+        return game.current_map.is_anyone_at(entity_new_position[0], entity_new_position[1]), entity_new_position
 
 
 event_to_handler = {"exit_game" : Event.exit_game_handler, "player_movement": Event.player_movement_handler,

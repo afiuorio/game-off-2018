@@ -129,8 +129,8 @@ class MapBuilder:
                         next_room += 1
                 self.corridors.append(self.rooms[i].link_to(self.rooms[next_room]))
 
-        self.fill_enemies()
         self.carve_map()
+        self.fill_enemies()
         return self.map
 
     def make_room(self, quadrant, room_width, room_height):
@@ -142,11 +142,12 @@ class MapBuilder:
         for room in self.rooms:
             enemy_number = (self.depth * 2) + randint(-1, 2)
             for i in range(enemy_number):
-                x = randint(room.dimensions.x1, room.dimensions.x2)
-                y = randint(room.dimensions.y1, room.dimensions.y2)
+                # the +1 / -1 SHOULD fix the bug where sometimes enemies spawn inside walls
+                x = randint(room.dimensions.x1+1, room.dimensions.x2-1)
+                y = randint(room.dimensions.y1+1, room.dimensions.y2-1)
                 while self.map.is_something_at(x, y):
-                    x = randint(room.dimensions.x1, room.dimensions.x2)
-                    y = randint(room.dimensions.y1, room.dimensions.y2)
+                    x = randint(room.dimensions.x1+1, room.dimensions.x2-1)
+                    y = randint(room.dimensions.y1+1, room.dimensions.y2-1)
                 if randint(0, 10) < 10:
                     self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing", "Pip!",
                                                      5, 4, 1))
@@ -270,7 +271,10 @@ class Map:
             else:
                 return tentative_direction
 
+    # FIXME: there is A LOT of optimization and finetuning to do here
     def path_towards_astar(self, game, origin, target):
+        # getting the fov vamp from currentDrawMap doesn't work in debug mode since it isn't initialized
+        # so for the moment I'm recomputing it every time, it's super wasteful but the game chugs along nicely
         fov = libtcod.map_new(self.width, self.height)
 
         list(map(lambda tile: libtcod.map_set_properties(fov, tile.x, tile.y, tile.trasparent, not tile.block),
@@ -285,7 +289,7 @@ class Map:
         libtcod.path_compute(my_path, origin.x, origin.y, target.x, target.y)
 
         return_direction = (0, 0)
-        if not libtcod.path_is_empty(my_path):# and libtcod.path_size(my_path) < 20:
+        if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 30:
             x, y = libtcod.path_walk(my_path, True)
             if x or y:
                 x1 = 1 if origin.x < x else -1 if origin.x > x else 0
