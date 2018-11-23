@@ -1,9 +1,7 @@
 from .objects import DrawableObject
-from .objects import Monster
-from .objects import AIObject
+from .objects import Monster, MonsterFactory
 
-from random import shuffle, randint, choice
-from copy import deepcopy
+from random import shuffle, randint
 
 import libtcodpy as libtcod
 
@@ -135,18 +133,13 @@ class MapBuilder:
         self.map = Map(map_width, map_height)
         room = Room(int(map_width / 4), int(map_height / 4), int(map_width / 2), int(map_height / 2))
         self.rooms.append(room)
-        self.map.entity_list.append(
-            Monster("p", int(map_width / 4) +3, int(map_height / 4) + 2, "Pipsqueak", "A friendly small thing",
-                    "Pip!", 5, 4, 1))
-        self.map.entity_list.append(
-            Monster("p", int(map_width / 4) * 3 - 4, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
-                    "Pip!", 5, 4, 1))
-        self.map.entity_list.append(
-            Monster("p", int(map_width / 4) * 3 - 6, int(map_height / 4) * 3 - 2, "Pipsqueak", "A friendly small thing",
-                    "Pip!", 5, 4, 1))
-        self.map.entity_list.append(
-            Monster("O", int(map_width / 4) * 3 - 8, int(map_height / 4) * 3 - 2, "Odd Ooze", "Oddly obstinated ochre ooze",
-                    "Fgfsd", 10, 6, 1))
+
+        factory = MonsterFactory()
+        self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) +3, int(map_height / 4) + 2))
+        self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) * 3 - 4, int(map_height / 4) * 3 - 2))
+        self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) * 3 - 6, int(map_height / 4) * 3 - 2))
+        self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) * 3 - 8, int(map_height / 4) * 3 - 2))
+
         self.carve_map()
         for x in range(int(map_width / 8) * 3, int(map_width / 8) * 5):
             for y in range(int(map_height / 8) * 3, int(map_height / 8) * 5):
@@ -159,6 +152,7 @@ class MapBuilder:
         self.rooms.append(new_room)
 
     def fill_enemies(self):
+        factory = MonsterFactory()
         for room in self.rooms:
             enemy_number = (self.depth * 2) + randint(-1, 2)
             for i in range(enemy_number):
@@ -169,11 +163,9 @@ class MapBuilder:
                     x = randint(room.dimensions.x1+1, room.dimensions.x2-1)
                     y = randint(room.dimensions.y1+1, room.dimensions.y2-1)
                 if randint(0, 10) < 10:
-                    self.map.entity_list.append(Monster("p", x, y, "Pipsqueak", "A friendly small thing", "Pip!",
-                                                     5, 4, 1))
+                    self.map.entity_list.append(factory.make_monster("Pipsqueak", x, y))
                 else:
-                    self.map.entity_list.append(Monster("O", x, y, "Odd Ooze", "Oddly obstinated ochre ooze", "Fgfsd",
-                                                        10, 6, 1))
+                    self.map.entity_list.append(factory.make_monster("Odd Ooze", x, y))
 
     def carve_map(self):
         for room in self.rooms:
