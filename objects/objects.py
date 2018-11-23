@@ -32,3 +32,15 @@ class Monster(Entity):
     def dies(self):
         self.algorithm = AIObject.death
 
+
+class MonsterFactory:
+    def __init__(self, console=0):
+        self.console = console
+
+    def make_monster(self, name, x, y):
+        sprite, description, cry, hp, attack, defense = self.monster_dictionary[name]
+        return Monster(sprite, x, y, name, description, cry, hp, attack, defense)
+
+    monster_dictionary = {"Pipsqueak": ("p", "A friendly small thing", "Pip!", 5, 4, 1),
+                          "Odd Ooze": ("O", "Oddly obstinated ochre ooze", "Fgfsd", 10, 6, 1)}
+
