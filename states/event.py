@@ -49,15 +49,24 @@ class Event:
         game.game_screen.message_log.add_line(
             Message(str(self.origin) + " says: " + self.info + "!", libtcod.light_green))
 
+    def cursors_movement_handler(self, game):
+        game.menu.move_cursor(self.info)
+
+    def cursor_selection_handler(self, game):
+        game.menu.select_choice()
+
     def go_pause_handler(self, game):
-        game.game_state = game.game_states_map.get("Pause")
+        game.change_game_state("Pause")
 
     def go_active_handler(self, game):
-        game.game_state = game.game_states_map.get("Active")
+        game.change_game_state("Active")
+
+    def go_menu_handler(self, game):
+        game.change_game_state("Menu")
 
     def go_game_over_handler(self, game):
         libtcod.console_wait_for_keypress(True)
-        game.game_state = game.game_states_map.get("Game Over")
+        game.change_game_state("Game_Over")
 
     def reset_handler(self, game):
         if game.debug:
@@ -94,7 +103,9 @@ class Event:
 event_to_handler = {"exit_game": Event.exit_game_handler, "player_movement": Event.player_movement_handler,
                     "monster_movement": Event.monster_movement_handler, "monster_action": Event.monster_action_handler,
                     "monster_aggressive_movement": Event.monster_aggressive_movement_handler,
+                    "cursor_movement": Event.cursors_movement_handler, "cursor_selection": Event.cursor_selection_handler,
                     "go_pause": Event.go_pause_handler, "go_active": Event.go_active_handler,
-                    "game_over": Event.go_game_over_handler, "nop": Event.nop_handler,
+                    "game_over": Event.go_game_over_handler, "go_menu": Event.go_menu_handler,
+                    "nop": Event.nop_handler,
                     "death": Event.death_handler, "reset": Event.reset_handler,
                     }

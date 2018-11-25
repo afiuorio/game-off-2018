@@ -5,4 +5,5 @@ from states.game import Game
 import sys
 
 if __name__ == "__main__":
-    Game(len(sys.argv) > 1 and sys.argv[1] == "DEBUG", len(sys.argv) > 2 and sys.argv[2] == "ROOM").run_game()
+    Game(len(sys.argv) > 1 and sys.argv[1] == "DEBUG", len(sys.argv) > 2 and sys.argv[2] == "ROOM",
+         len(sys.argv) > 3 and sys.argv[3] == "FARM").run_game()

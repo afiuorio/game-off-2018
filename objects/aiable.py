@@ -37,7 +37,7 @@ class AIObject:
         key = libtcod.console_wait_for_keypress(True)
         key_map = {
             libtcod.KEY_ESCAPE: ("exit_game", None),
-            libtcod.KEY_ENTER: ("go_pause", None),
+            libtcod.KEY_ENTER: ("go_menu", None),
 
             libtcod.KEY_SPACE: ("reset", None),
 

@@ -7,8 +7,8 @@ import libtcodpy as libtcod
 
 
 class Tiles(DrawableObject):
-    def __init__(self, x, y, glyph="", block=False, trasparent=True):
-        DrawableObject.__init__(self, glyph, x, y)
+    def __init__(self, x, y, console, glyph="", block=False, trasparent=True):
+        DrawableObject.__init__(self, glyph, x, y, console)
         self.block = block
         self.trasparent = trasparent
         self.explored = False
@@ -88,13 +88,14 @@ class Corridor:
 
 
 class MapBuilder:
-    def __init__(self, depth):
+    def __init__(self, depth, console):
         self.rooms = list()
         self.corridors = list()
         self.depth = depth
+        self.console = console
 
     def make_map(self, map_width, map_height):
-        self.map = Map(map_width, map_height)
+        self.map = Map(map_width, map_height, self.console)
         max_rooms_per_quadrant = (self.depth * 2) + randint(-1, 1)
         big_room = range(1, 20) is 20
 
@@ -130,11 +131,11 @@ class MapBuilder:
         return self.map
 
     def make_map_debug(self, map_width, map_height):
-        self.map = Map(map_width, map_height)
+        self.map = Map(map_width, map_height, self.console)
         room = Room(int(map_width / 4), int(map_height / 4), int(map_width / 2), int(map_height / 2))
         self.rooms.append(room)
 
-        factory = MonsterFactory()
+        factory = MonsterFactory(self.console)
         self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) +3, int(map_height / 4) + 2))
         self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) * 3 - 4, int(map_height / 4) * 3 - 2))
         self.map.entity_list.append(factory.make_monster("Pipsqueak", int(map_width / 4) * 3 - 6, int(map_height / 4) * 3 - 2))
@@ -143,7 +144,7 @@ class MapBuilder:
         self.carve_map()
         for x in range(int(map_width / 8) * 3, int(map_width / 8) * 5):
             for y in range(int(map_height / 8) * 3, int(map_height / 8) * 5):
-                self.map.mapBuffer[x][y] = Tiles(x, y, "#", True, False)
+                self.map.mapBuffer[x][y] = Tiles(x, y, self.console, "#", True, False)
         return self.map
 
     def make_room(self, quadrant, room_width, room_height):
@@ -152,7 +153,7 @@ class MapBuilder:
         self.rooms.append(new_room)
 
     def fill_enemies(self):
-        factory = MonsterFactory()
+        factory = MonsterFactory(self.console)
         for room in self.rooms:
             enemy_number = (self.depth * 2) + randint(-1, 2)
             for i in range(enemy_number):
@@ -171,15 +172,15 @@ class MapBuilder:
         for room in self.rooms:
             for j in range(room.dimensions.x1, room.dimensions.x2):
                 for k in range(room.dimensions.y1, room.dimensions.y2):
-                    self.map.mapBuffer[j][k] = Tiles(j, k, ".")
+                    self.map.mapBuffer[j][k] = Tiles(j, k, self.console, ".")
         for corridor in self.corridors:
             j, k = corridor.x, corridor.y
-            self.map.mapBuffer[j][k] = Tiles(j, k, ".")
+            self.map.mapBuffer[j][k] = Tiles(j, k, self.console, ".")
             for direction in corridor.steps:
                 d1, d2 = direction
                 j += d1
                 k += d2
-                self.map.mapBuffer[j][k] = Tiles(j, k, ".")
+                self.map.mapBuffer[j][k] = Tiles(j, k, self.console, ".")
         self.map.make_walls()
 
 
@@ -197,12 +198,13 @@ class Quadrants:
 
 
 class Map:
-    def __init__(self, map_x, map_y):
+    def __init__(self, map_x, map_y, console):
         self.width = map_x
         self.height = map_y
+        self.console = console
         self.quadrants = Quadrants(Rectangle(0, 0, map_x, map_y))
         self.entity_list = list()
-        self.mapBuffer = [[Tiles(x, y, " ", True) for y in range(map_y)] for x in range(map_x)]
+        self.mapBuffer = [[Tiles(x, y, self.console, " ", True) for y in range(map_y)] for x in range(map_x)]
 
     def get_tile(self, x, y):
         return self.mapBuffer[x][y]
@@ -226,7 +228,7 @@ class Map:
     def make_room(self, x, y, w, h):
         for j in range(x, x + w):
             for k in range(y, y + h):
-                self.mapBuffer[j][k] = Tiles(j, k, ".")
+                self.mapBuffer[j][k] = Tiles(j, k, self.console, ".")
 
     # we should check if the values are inside the map
     def make_corridor(self, x1, y1, x2, y2):
@@ -234,9 +236,9 @@ class Map:
         step2 = 1 if y1 < y2 else -1
 
         for j in range(x1, x2, step1):
-            self.mapBuffer[j][y1] = Tiles(j, y1, ".")
+            self.mapBuffer[j][y1] = Tiles(j, y1, self.console, ".")
         for k in range(y1, y2, step2):
-            self.mapBuffer[j][k] = Tiles(j, k, ".")
+            self.mapBuffer[j][k] = Tiles(j, k, self.console, ".")
 
     def make_walls(self):
         for x in range(self.width):
@@ -245,7 +247,7 @@ class Map:
                     for j in range(x - 1, x + 2):
                         for k in range(y - 1, y + 2):
                             if not self.is_blocked_at(j, k):
-                                self.mapBuffer[j][k] = Tiles(j, k, "#", True, False)
+                                self.mapBuffer[j][k] = Tiles(j, k, self.console, "#", True, False)
 
     def get_free_space(self):
         x = randint(1, self.width - 1)
@@ -321,9 +323,10 @@ class Map:
 
 
 class DrawableMap():
-    def __init__(self, currentMap, player):
+    def __init__(self, currentMap, player, console):
         self.currentMap = currentMap
         self.player = player
+        self.console = console
         self.fov_map = libtcod.map_new(currentMap.width, currentMap.height)
         self.fov_size = 5
 
@@ -345,18 +348,20 @@ class DrawableMap():
     def draw(self):
         for tile in self.currentMap.get_map_list():
             tile.draw()
-            libtcod.console_set_char_foreground(0, tile.x, tile.y,  libtcod.Color(255, 0, 0))
+            libtcod.console_set_char_foreground(self.console, tile.x, tile.y,  libtcod.Color(255, 0, 0))
         
         for tile in self.get_tiles_in_fov():
             self.currentMap.get_tile(tile.x,tile.y).explored = True
-            libtcod.console_set_char_foreground(0, tile.x, tile.y, libtcod.Color(255, 255, 255))
+            libtcod.console_set_char_foreground(self.console, tile.x, tile.y, libtcod.Color(255, 255, 255))
 
 
 class DebugDrawableMap():
-    def __init__(self, currentMap, player):
+    def __init__(self, currentMap, player, console):
         self.currentMap = currentMap
         self.player = player
+        self.console = console
         self.fov_map = currentMap
+
         for tile in self.currentMap.get_map_list():
             tile.explored = True;
 
@@ -372,4 +377,4 @@ class DebugDrawableMap():
     def draw(self):
         for tile in self.currentMap.get_map_list():
             tile.draw()
-            libtcod.console_set_char_foreground(0, tile.x, tile.y, libtcod.Color(255, 255, 255))
+            libtcod.console_set_char_foreground(self.console, tile.x, tile.y, libtcod.Color(255, 255, 255))
